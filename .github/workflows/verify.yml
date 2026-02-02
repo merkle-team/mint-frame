@@ -3,16 +3,6 @@ name: Verify
 on:
   pull_request:
     branches: [main]
-  workflow_call:
-    secrets:
-      STACK_DEPLOY_SSH_PRIVATE_KEY:
-        required: true
-      DEPOT_PROJECT_ID:
-        required: true
-      DOCKERHUB_USER:
-        required: true
-      DOCKERHUB_PASSWORD:
-        required: true
 
 # Cancel in-progress workflows for the same PR or branch/tag
 concurrency:
@@ -22,20 +12,15 @@ concurrency:
 # Needs to be a superset of what Verify workflow needs
 permissions:
   contents:      read  # Clone repo
-  id-token:      write # Depot OIDC
+  id-token:      write # OIDC
 
 jobs:
   build:
     timeout-minutes: 10
-    runs-on: depot-ubuntu-latest-arm
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build
         with:
-          dockerhub-user: ${{ secrets.DOCKERHUB_USER }}
-          dockerhub-password: ${{ secrets.DOCKERHUB_PASSWORD }}
           dockerfile: ./Dockerfile
-          depot: true
-          depot-project-id: ${{ secrets.DEPOT_PROJECT_ID }}
           context: .
-          platforms: 'linux/arm64'
